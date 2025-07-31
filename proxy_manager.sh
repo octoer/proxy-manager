@@ -845,4 +845,18 @@ main_menu() {
 require_root
 detect_os
 install_dependencies
+
+# Ensure a convenient alias 'pm' is available system-wide by creating a symlink
+setup_quick_command() {
+    local target="/usr/local/bin/pm"
+    local script_path
+    script_path="$(readlink -f "$0")"
+    if [[ "$script_path" != "$target" ]]; then
+        ln -sf "$script_path" "$target"
+        chmod +x "$target"
+    fi
+}
+# Create/update the symlink
+setup_quick_command
+
 main_menu
