@@ -17,14 +17,18 @@ To download and run the script on your server, use one of the following two‑st
 ```bash
 # 使用 wget 下载脚本
 wget -O proxy_manager.sh https://raw.githubusercontent.com/octoer/proxy-manager/main/proxy_manager.sh
+
 # 直接运行脚本（无需额外赋权，脚本会自动安装依赖并打开菜单）
 sudo bash proxy_manager.sh
+```
 
+```bash
 # 使用 curl 下载脚本
 curl -fsSL https://raw.githubusercontent.com/octoer/proxy-manager/main/proxy_manager.sh -o proxy_manager.sh
 
 # 直接运行脚本
 sudo bash proxy_manager.sh
+```
 
 运行脚本后，它会自动检测您的系统、安装必要的依赖，然后进入交互式菜单供您选择要管理的代理协议。首次运行脚本会在 /usr/local/bin/pm 创建一个系统范围的符号链接，随后可以通过 pm 快捷命令再次启动管理脚本。
 
