@@ -60,13 +60,6 @@ detect_os() {
 require_root
 detect_os
 
-# 只在首次运行时安装依赖，提高后续启动速度
-STATE_FILE="/usr/local/share/proxy_manager_setup_done"
-if [[ ! -f "$STATE_FILE" ]]; then
-    install_dependencies
-    touch "$STATE_FILE"
-fi
-
 # 创建快速命令 symlink
 setup_quick_command
 
@@ -833,54 +826,49 @@ tuic_menu() {
     done
 }
 
-main_menu() {
-    while true; do
-        echo ""
-        echo "==== Proxy Manager ===="
-        echo "1) Snell"
-        echo "2) Hysteria 2"
-        echo "3) Shadowsocks‑Rust + ShadowTLS"
-        echo "4) V2Ray (VMess/VLess)"
-        echo "5) Trojan"
-        echo "6) TUIC"
-        echo "7) Uninstall Proxy Manager script"
-        echo "0) Exit"
-        read -rp "Select a protocol to manage: " main_choice
-        case "$main_choice" in
-            1) snell_menu ;;
-            2) hysteria_menu ;;
-            3) ss_menu ;;
-            4) v2ray_menu ;;
-            5) trojan_menu ;;
-            6) tuic_menu ;;
-            7) uninstall_script ;;
-            0) exit ;;
-            *) echo -e "${RED}Invalid option.${PLAIN}" ;;
-            esac
-       echo ""
-    echo "==== Uninstall Proxy Manager ===="
-    # Remove symlink if exists
-    if [ -L "/usr/local/bin/pm" ]; then
-        rm -f /usr/local/bin/pm
-        echo "Removed symlink /usr/local/bin/pm"
-    fi
-    # Remove script file itself
-    script_path="$(readlink -f "$0")"
-    rm -f "$script_path"
-    echo "Removed script file $script_path"
-    echo "Proxy Manager has been uninstalled."
-    exit 0
-        ;;
-
-
-                
-                    
-            0) echo "Exiting."; exit 0 ;;
-            *) echo "Invalid selection" ;;
-        esac
-       
-    done
+uninstall_script() {
+  echo ""
+  echo "==== Uninstall Proxy Manager ===="
+  # Remove symlink if exists
+  if [ -L "/usr/local/bin/pm" ]; then
+    rm -f /usr/local/bin/pm
+    echo "Removed symlink /usr/local/bin/pm"
+  fi
+  # Remove script itself
+  script_path="$(readlink -f "$0")"
+  rm -f "$script_path"
+  echo "Removed script file $script_path"
+  echo "Proxy Manager has been uninstalled."
+  exit 0
 }
+
+main_menu() {
+  while true; do
+    echo ""
+    echo "==== Proxy Manager ===="
+    echo "1) Snell"
+    echo "2) Hysteria 2"
+    echo "3) Shadowsocks-Rust + ShadowTLS"
+    echo "4) V2Ray (VMess/VLess)"
+    echo "5) Trojan"
+    echo "6) TUIC"
+    echo "7) Uninstall Proxy Manager script"
+    echo "0) Exit"
+    read -rp "Select a protocol to manage: " main_choice
+    case "$main_choice" in
+      1) snell_menu ;;
+      2) hysteria_menu ;;
+      3) ss_menu ;;
+      4) v2ray_menu ;;
+      5) trojan_menu ;;
+      6) tuic_menu ;;
+      7) uninstall_script ;;
+      0) echo "Exiting."; exit 0 ;;
+      *) echo "Invalid selection" ;;
+    esac
+  done
+}
+
 
 # Entry point
 require_root
@@ -897,7 +885,20 @@ setup_quick_command() {
         chmod +x "$target"
     fi
 }
-# Create/update the symlink
+# ===== Entry point (keep this at the VERY END of the file) =====
+require_root
+detect_os
+
+# Only install dependencies on first run to speed up subsequent starts
+STATE_FILE="/usr/local/share/proxy_manager_setup_done"
+if [[ ! -f "$STATE_FILE" ]]; then
+  install_dependencies
+  touch "$STATE_FILE"
+fi
+
+# Ensure quick command symlink
 setup_quick_command
 
+# Start menu
 main_menu
+
