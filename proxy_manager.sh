@@ -823,6 +823,8 @@ main_menu() {
         echo "1) Snell"
         echo "2) Hysteria 2"
         echo "3) Shadowsocks‑Rust + ShadowTLS"
+            echo "7) Uninstall Proxy Manager script"
+    
         echo "4) V2Ray (VMess/VLess)"
         echo "5) Trojan"
         echo "6) TUIC"
@@ -834,10 +836,30 @@ main_menu() {
             3) ss_menu ;;
             4) v2ray_menu ;;
             5) trojan_menu ;;
-            6) tuic_menu ;;
+
+           7)
+       echo ""
+    echo "==== Uninstall Proxy Manager ===="
+    # Remove symlink if exists
+    if [ -L "/usr/local/bin/pm" ]; then
+        rm -f /usr/local/bin/pm
+        echo "Removed symlink /usr/local/bin/pm"
+    fi
+    # Remove script file itself
+    script_path="$(readlink -f "$0")"
+    rm -f "$script_path"
+    echo "Removed script file $script_path"
+    echo "Proxy Manager has been uninstalled."
+    exit 0
+        ;;
+
+
+                
+                    
             0) echo "Exiting."; exit 0 ;;
             *) echo "Invalid selection" ;;
         esac
+       
     done
 }
 
