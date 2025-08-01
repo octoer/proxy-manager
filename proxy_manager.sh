@@ -816,6 +816,9 @@ tuic_menu() {
     done
 }
 
+############################################################
+# Uninstall function (standalone; keeps main_menu clean)
+############################################################
 uninstall_script() {
   echo ""
   echo "==== Uninstall Proxy Manager ===="
@@ -824,7 +827,7 @@ uninstall_script() {
     rm -f /usr/local/bin/pm
     echo "Removed symlink /usr/local/bin/pm"
   fi
-  # Remove script itself
+  # Remove script file itself
   script_path="$(readlink -f "$0")"
   rm -f "$script_path"
   echo "Removed script file $script_path"
@@ -832,6 +835,22 @@ uninstall_script() {
   exit 0
 }
 
+############################################################
+# Quick command symlink helper (define once, call in entry)
+############################################################
+setup_quick_command() {
+  local target="/usr/local/bin/pm"
+  local script_path
+  script_path="$(readlink -f "$0")"
+  if [[ "$script_path" != "$target" ]]; then
+    ln -sf "$script_path" "$target"
+    chmod +x "$target"
+  fi
+}
+
+############################################################
+# Main menu (clean numbering + simple case mapping)
+############################################################
 main_menu() {
   while true; do
     echo ""
@@ -853,42 +872,30 @@ main_menu() {
       5) trojan_menu ;;
       6) tuic_menu ;;
       7) uninstall_script ;;
-      0) echo "Exiting."; exit 0 ;;
-      *) echo "Invalid selection" ;;
+      0) exit 0 ;;
+      *) echo -e "${RED}Invalid option.${PLAIN}" ;;
     esac
   done
 }
 
-
-# Entry point
+############################################################
+# ===== Entry point (keep this at the VERY END of the file)
+############################################################
 require_root
-detect_os
-install_dependencies
 
-# Ensure a convenient alias 'pm' is available system-wide by creating a symlink
-setup_quick_command() {
-    local target="/usr/local/bin/pm"
-    local script_path
-    script_path="$(readlink -f "$0")"
-    if [[ "$script_path" != "$target" ]]; then
-        ln -sf "$script_path" "$target"
-        chmod +x "$target"
-    fi
-}
-# ===== Entry point (keep this at the VERY END of the file) =====
-require_root
-detect_os
-
-# Only install dependencies on first run to speed up subsequent starts
+# Only on first run do OS detection + dependency installation
 STATE_FILE="/usr/local/share/proxy_manager_setup_done"
 if [[ ! -f "$STATE_FILE" ]]; then
+  detect_os
   install_dependencies
   touch "$STATE_FILE"
 fi
 
-# Ensure quick command symlink
-setup_quick_command
+# Create/update the quick command symlink only when needed
+if [[ ! -L /usr/local/bin/pm ]] || [[ "$(readlink -f /usr/local/bin/pm)" != "$(readlink -f "$0")" ]]; then
+  ln -sf "$(readlink -f "$0")" /usr/local/bin/pm
+  chmod +x /usr/local/bin/pm
+fi
 
-# Start menu
+# Enter menu
 main_menu
-
