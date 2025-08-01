@@ -56,6 +56,23 @@ detect_os() {
     fi
 }
 
+# Entry point
+require_root
+detect_os
+
+# 只在首次运行时安装依赖，提高后续启动速度
+STATE_FILE="/usr/local/share/proxy_manager_setup_done"
+if [[ ! -f "$STATE_FILE" ]]; then
+    install_dependencies
+    touch "$STATE_FILE"
+fi
+
+# 创建快速命令 symlink
+setup_quick_command
+
+# 显示主菜单
+main_menu
+
 # Install common tools if missing.  These are needed for the
 # configuration helpers (sed, curl, systemctl, etc.).  The upstream
 # install scripts will install additional dependencies as required.
@@ -823,11 +840,10 @@ main_menu() {
         echo "1) Snell"
         echo "2) Hysteria 2"
         echo "3) Shadowsocks‑Rust + ShadowTLS"
-            echo "7) Uninstall Proxy Manager script"
-    
         echo "4) V2Ray (VMess/VLess)"
         echo "5) Trojan"
         echo "6) TUIC"
+        echo "7) Uninstall Proxy Manager script"
         echo "0) Exit"
         read -rp "Select a protocol to manage: " main_choice
         case "$main_choice" in
@@ -836,8 +852,11 @@ main_menu() {
             3) ss_menu ;;
             4) v2ray_menu ;;
             5) trojan_menu ;;
-
-           7)
+            6) tuic_menu ;;
+            7) uninstall_script ;;
+            0) exit ;;
+            *) echo -e "${RED}Invalid option.${PLAIN}" ;;
+            esac
        echo ""
     echo "==== Uninstall Proxy Manager ===="
     # Remove symlink if exists
