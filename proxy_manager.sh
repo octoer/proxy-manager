@@ -56,16 +56,6 @@ detect_os() {
     fi
 }
 
-# Entry point
-require_root
-detect_os
-
-# 创建快速命令 symlink
-setup_quick_command
-
-# 显示主菜单
-main_menu
-
 # Install common tools if missing.  These are needed for the
 # configuration helpers (sed, curl, systemctl, etc.).  The upstream
 # install scripts will install additional dependencies as required.
